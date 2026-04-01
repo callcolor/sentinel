@@ -61,7 +61,7 @@ class Reasoner:
         self,
         provider_url: str,
         api_key: Optional[str] = None,
-        model: str = "anthropic/claude-sonnet-4-20250514",
+        model: str = "anthropic/claude-sonnet-4",
         max_calls_per_hour: int = 10,
     ):
         self.client = ProviderClient(

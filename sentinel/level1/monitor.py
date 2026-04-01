@@ -32,7 +32,7 @@ class Monitor:
             self.reasoner = Reasoner(
                 provider_url=config.reasoning_provider,
                 api_key=config.reasoning_key,
-                model=config.reasoning_model or "anthropic/claude-sonnet-4-20250514",
+                model=config.reasoning_model or "anthropic/claude-sonnet-4",
                 max_calls_per_hour=config.max_reasoning_calls_per_hour,
             )
         self._initialized = False

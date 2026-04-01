@@ -13,7 +13,7 @@ mcp.add_middleware(SentinelMiddleware(
     # Level 2 — reasoning on anomalies via OpenRouter
     reasoning_provider="https://openrouter.ai/api/v1",
     reasoning_key="your-openrouter-key",
-    reasoning_model="anthropic/claude-sonnet-4-20250514",
+    reasoning_model="anthropic/claude-sonnet-4",
     max_reasoning_calls_per_hour=10,
 ))
 
