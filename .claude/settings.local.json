@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show:*)",
+      "Bash(python -c \"import fastmcp; print\\(fastmcp.__version__\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \"from sentinel import SentinelMiddleware, SentinelConfig; print\\('imports OK'\\); print\\(f'SentinelMiddleware: {SentinelMiddleware}'\\); print\\(f'SentinelConfig: {SentinelConfig}'\\)\")",
+      "Bash(python -c \"from sentinel import SentinelMiddleware, SentinelConfig; print\\('imports OK'\\)\")",
+      "Bash(python -c ':*)"
+    ]
+  }
+}
