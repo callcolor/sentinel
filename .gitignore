@@ -7,3 +7,4 @@ build/
 sentinel_data/
 *.db
 .venv/
+.env
