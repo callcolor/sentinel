@@ -168,6 +168,26 @@ class Baseline:
             reasons=reasons,
         )
 
+    async def get_summary(self) -> dict:
+        """Return a summary of the current baseline state for Level 2 context."""
+        summary = {
+            "total_observations": self._total_observations,
+            "baseline_established": self.is_established,
+            "threshold": self.threshold,
+        }
+
+        async with self._db.execute(
+            "SELECT tool_name, call_count, error_count FROM tool_stats ORDER BY call_count DESC"
+        ) as cur:
+            tools = await cur.fetchall()
+
+        summary["known_tools"] = {
+            name: {"calls": calls, "errors": errors}
+            for name, calls, errors in tools
+        }
+
+        return summary
+
     async def close(self) -> None:
         if self._db:
             await self._db.close()

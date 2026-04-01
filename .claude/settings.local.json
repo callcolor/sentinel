@@ -6,7 +6,9 @@
       "Bash(pip install:*)",
       "Bash(python -c \"from sentinel import SentinelMiddleware, SentinelConfig; print\\('imports OK'\\); print\\(f'SentinelMiddleware: {SentinelMiddleware}'\\); print\\(f'SentinelConfig: {SentinelConfig}'\\)\")",
       "Bash(python -c \"from sentinel import SentinelMiddleware, SentinelConfig; print\\('imports OK'\\)\")",
-      "Bash(python -c ':*)"
+      "Bash(python -c ':*)",
+      "Bash(python -c \"from sentinel import SentinelMiddleware; print\\('full import chain OK'\\)\")",
+      "Bash(python -m pytest tests/ -v)"
     ]
   }
 }

@@ -1,8 +1,9 @@
 """SentinelMiddleware — FastMCP integration point.
 
-Drop-in middleware that adds Level 1 anomaly detection to any FastMCP server.
+Drop-in middleware that adds intelligence to any FastMCP server.
 Intercepts tool calls, lets them execute normally, then fires off non-blocking
-analysis against the statistical baseline.
+Level 1 analysis. When anomalies are detected and a reasoning provider is
+configured, escalates to Level 2 for deeper analysis.
 """
 
 import logging
@@ -32,7 +33,7 @@ class SentinelMiddleware(Middleware):
     def __init__(
         self,
         *,
-        # Provider endpoints (Level 2 — deferred to v0.2)
+        # Provider endpoints
         embedding_provider: Optional[str] = None,
         reasoning_provider: Optional[str] = None,
         embedding_key: Optional[str] = None,

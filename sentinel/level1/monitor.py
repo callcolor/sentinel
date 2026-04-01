@@ -11,6 +11,7 @@ import logging
 from typing import Any
 
 from ..config import SentinelConfig
+from ..level2.reasoner import Reasoner
 from .baseline import AnomalyResult, Baseline
 from .fingerprint import fingerprint_tool_call
 
@@ -26,6 +27,14 @@ class Monitor:
             db_path=f"{config.storage_path}/baseline.db",
             threshold=config.baseline_threshold,
         )
+        self.reasoner: Reasoner | None = None
+        if config.reasoning_provider:
+            self.reasoner = Reasoner(
+                provider_url=config.reasoning_provider,
+                api_key=config.reasoning_key,
+                model=config.reasoning_model or "anthropic/claude-sonnet-4-20250514",
+                max_calls_per_hour=config.max_reasoning_calls_per_hour,
+            )
         self._initialized = False
 
     async def initialize(self) -> None:
@@ -61,6 +70,11 @@ class Monitor:
         await self.baseline.update(fp)
 
         self._emit(fp, anomaly)
+
+        # Escalate to Level 2 if anomalous and reasoning is configured
+        if anomaly.is_anomalous and self.reasoner:
+            await self._escalate(tool_name, arguments, anomaly)
+
         return anomaly
 
     def record_tool_call_nonblocking(
@@ -104,5 +118,23 @@ class Monitor:
         else:
             logger.debug("sentinel: %s", json.dumps(entry))
 
+    async def _escalate(
+        self,
+        tool_name: str,
+        arguments: dict[str, Any] | None,
+        anomaly: AnomalyResult,
+    ) -> None:
+        """Escalate a flagged anomaly to Level 2 reasoning."""
+        baseline_summary = await self.baseline.get_summary()
+        await self.reasoner.analyze(
+            tool_name=tool_name,
+            arguments=arguments,
+            anomaly_score=anomaly.score,
+            reasons=anomaly.reasons,
+            baseline_summary=baseline_summary,
+        )
+
     async def close(self) -> None:
         await self.baseline.close()
+        if self.reasoner:
+            await self.reasoner.close()
