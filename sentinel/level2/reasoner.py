@@ -106,7 +106,7 @@ class Reasoner:
             logger.error("sentinel L2: provider error: %s", e)
             return None
         except Exception as e:
-            logger.error("sentinel L2: unexpected error: %s", e)
+            logger.error("sentinel L2: unexpected error: %s: %s", type(e).__name__, e)
             return None
 
         insight = Insight(
