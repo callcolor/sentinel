@@ -11,7 +11,12 @@ dependencies = [
     "fastmcp>=2.9",
     "aiohttp>=3.9",
     "aiosqlite>=0.19",
+    "cyclopts>=4.0",
+    "python-dotenv>=1.0",
 ]
+
+[project.scripts]
+sentinel = "sentinel.cli:main"
 
 [project.optional-dependencies]
 dev = [

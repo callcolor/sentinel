@@ -2,9 +2,14 @@
 
 import hashlib
 import json
+import re
 import time
 from dataclasses import dataclass
 from typing import Any
+
+_UUID_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I
+)
 
 
 @dataclass(frozen=True)
@@ -48,6 +53,56 @@ def fingerprint_tool_call(
         param_types=param_types,
         shape_hash=shape_hash,
         timestamp=time.time(),
+        is_error=is_error,
+        error_message=error_message,
+    )
+
+
+def _parameterize_path(path: str) -> str:
+    """Replace dynamic path segments with :id placeholders.
+
+    Numeric segments and UUIDs become :id so that /users/123 and /users/456
+    produce the same fingerprint identity.
+    """
+    segments = path.strip("/").split("/")
+    result = []
+    for seg in segments:
+        if not seg:
+            continue
+        if seg.isdigit() or _UUID_RE.match(seg):
+            result.append(":id")
+        else:
+            result.append(seg)
+    return "/" + "/".join(result) if result else "/"
+
+
+def fingerprint_http_request(
+    method: str,
+    path: str,
+    query_params: dict[str, Any] | None = None,
+    body: dict[str, Any] | None = None,
+    status_code: int | None = None,
+) -> RequestFingerprint:
+    """Create a fingerprint from an HTTP request for REST mode.
+
+    Identity is METHOD + parameterized path (e.g. "POST /api/users/:id").
+    Shape is derived from query params + request body structure.
+    """
+    tool_name = f"{method.upper()} {_parameterize_path(path)}"
+
+    # Combine query params and body keys for shape
+    combined: dict[str, Any] = {}
+    if query_params:
+        combined.update(query_params)
+    if body:
+        combined.update(body)
+
+    is_error = status_code is not None and status_code >= 400
+    error_message = f"HTTP {status_code}" if is_error else None
+
+    return fingerprint_tool_call(
+        tool_name=tool_name,
+        arguments=combined if combined else None,
         is_error=is_error,
         error_message=error_message,
     )
